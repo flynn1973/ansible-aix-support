@@ -16,7 +16,21 @@
 from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 
+# import modules needed
+import sys
+import shlex
+import os
+import platform
 import re
+import itertools
+import commands
+import subprocess
+
+try:
+    import json
+except ImportError:
+    import simplejson as json
+
 
 from ansible.module_utils.facts.hardware.base import Hardware, HardwareCollector
 
@@ -34,6 +48,7 @@ class AIXHardware(Hardware):
     """
     platform = 'AIX'
 
+
     def populate(self, collected_facts=None):
         hardware_facts = {}
 
@@ -50,6 +65,7 @@ class AIXHardware(Hardware):
         hardware_facts.update(vgs_facts)
         hardware_facts.update(mount_facts)
         hardware_facts.update(devices_facts)
+
 
         return hardware_facts
 

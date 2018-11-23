@@ -7,9 +7,8 @@ echo "Starting installation of Ansible AIX support"
 echo ""
 
 if [ "$(uname)" != "Linux" ]; then
-   echo "[WARNING] Ansible AIX support is tested only on Linux and this scripts can fail."
-   echo -e "          Press enter to continue or Ctrl+C to cancel it."
-   read continue
+   echo "[ERROR] Ansible AIX support install only on Linux based Ansible Controller."
+   exit 1
 fi
 
 if [ "$(whoami)" != "root" ];then
@@ -27,7 +26,7 @@ echo "[INFO] Ansible found."
 
 echo "[INFO] Checking Ansible installation"
 ansible_version=$(echo ${ansible_data} | awk '{ print $2 }' | awk -F"." '{ print $1"."$2 }')
-if [ "${ansible_version}" != "2.4" ]; then
+if [ "${ansible_version}" != "2.6" ]; then
     echo "[WARNING] Ansible AIX support is tested with Ansible 2.4, you have version ${ansible_version}"
     echo -e "          Press enter to continue or Ctrl+C to cancel."
     read continue
