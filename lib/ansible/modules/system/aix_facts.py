@@ -26,28 +26,26 @@ DOCUMENTATION = '''
 ---
 module: aix_facts
 version_added: "2.3"
-short_description: Gathers AIX/ING specific facts
+short_description: Gathers AIX specific facts
 description:
-    - This module gathers AIX/ING specific facts
+    - This module gathers AIX specific facts
     - It delivers the folowing ansible_facts
-      oslevel, build(ING specific), lpps, filesystems, mounts, vgs, lssrc,
-    - niminfo, uname, drmode(ING specific)
-author: "InfraNL/SE/AIX"
+      oslevel, lpps, filesystems, mounts, vgs, lssrc,
+    - niminfo, uname
+author: "@molekuul"
 options:
   options:
     description:
     - name of the fact you want to recieve, default you will recieve the folowing facts
-      'oslevel','build','filesystems','mounts','vgs','lssrc','niminfo','lparstat','uname','drmode','ipfilt'
+      'oslevel','filesystems','mounts','vgs','lssrc','niminfo','lparstat','uname','ipfilt'
       the option all will give the folowing facts
-      'oslevel','build','lpps','filesystems','mounts','vgs','lssrc','niminfo','lparstat','uname','drmode','ipfilt'
+      'oslevel','lpps','filesystems','mounts','vgs','lssrc','niminfo','lparstat','uname','ipfilt'
 
 '''
 
 
 RETURN = '''
 ansible_facts: {
-    "build": "2010_2",
-    "drmode": false,
     "filesystems": [
         {
             "Acct": "no",
@@ -322,12 +320,11 @@ EXAMPLES = '''
     options:
       - all
 
-# show facts uname and build:
+# show facts uname:
 - name: show facts uname and build
   aix_facts:
     options:
       - uname
-      - build
 
 '''
 
@@ -408,27 +405,6 @@ def get_oslevel(module):
     lijst.update(adict)
 
     return lijst
-
-
-def get_build(module):
-    """
-    reads the /var/adm/autoinstall/etc/BUILD to determine the BUILS,
-    if this fails, it reads the /etc/BUILD
-    the output is the BUILD version
-    """
-    build = {}
-    org_file = '/var/adm/autoinstall/etc/BUILD'
-    copy_file = '/etc/BUILD'
-    try:
-        if os.path.exists(org_file):
-            build = ''.join([line.strip() for line in open(org_file, 'r')])
-    except IOError as e:
-        if os.path.exists(copy_file):
-            build = ''.join([line.strip() for line in open(copy_file, 'r')])
-    except IOError as e:
-        module.fail_json(msg="could not determine BUILD", rc=rc, err=e)
-    return build
-
 
 def get_lpps(module):
     """
@@ -676,20 +652,6 @@ def get_uname(module):
     return list
 
 
-def get_drmode(module):
-    drmode = {}
-    uname_list = get_uname(module)
-    try:
-        profile = uname_list['lparname']
-        if re.search("[_|-]dr$", profile):
-            drmode = True
-        else:
-            drmode = False
-    except BaseException:
-        module.warnings.append("Unable to retrieve drmode")
-    return drmode
-
-
 def get_ipfilt(module):
     lijst = []
     cmd = ['/usr/sbin/lsfilt', '-O']
@@ -738,7 +700,6 @@ def get_ipfilt(module):
 def main():
     all_facts = [
         'oslevel',
-        'build',
         'lpps',
         'filesystems',
         'mounts',
@@ -747,11 +708,9 @@ def main():
         'niminfo',
         'lparstat',
         'uname',
-        'drmode',
         'ipfilt']
     default_facts = [
         'oslevel',
-        'build',
         'filesystems',
         'mounts',
         'vgs',
@@ -759,7 +718,6 @@ def main():
         'niminfo',
         'lparstat',
         'uname',
-        'drmode',
         'ipfilt']
     module = AnsibleModule(
         argument_spec=dict(
